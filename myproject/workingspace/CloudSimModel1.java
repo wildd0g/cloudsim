@@ -39,6 +39,7 @@ import org.cloudbus.cloudsim.provisioners.PeProvisionerSimple;
 import org.cloudbus.cloudsim.provisioners.RamProvisionerSimple;
 
 import workingspace.VmAlt;
+import workingspace.VmSchedulerTimeSharedOverSubscriptionAlt;
 
 /**
  * A simple example showing how to create a data center with one host and run one cloudlet on it.
@@ -197,7 +198,7 @@ public class CloudSimModel1 {
 						new BwProvisionerSimple(bw),
 						storage,
 						peList,
-						new VmSchedulerTimeSharedOverSubscription(peList)
+						new VmSchedulerTimeSharedOverSubscriptionAlt(peList)
 						)
 				); // This is our machine
 	}
