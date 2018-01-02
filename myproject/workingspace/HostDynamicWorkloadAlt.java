@@ -2,6 +2,7 @@ package workingspace;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.cloudbus.cloudsim.HostDynamicWorkload;
 import org.cloudbus.cloudsim.Log;
@@ -69,6 +70,7 @@ public class HostDynamicWorkloadAlt extends HostDynamicWorkload {
 						totalRequestedMips / vm.getTotalMips() * 100);
 				//Actual changes above, replaced getMips() with getTotalMips(), requires update to VM.
 
+								
 				List<Pe> pes = getVmScheduler().getPesAllocatedForVM(vm);
 				StringBuilder pesString = new StringBuilder();
 				for (Pe pe : pes) {
@@ -80,6 +82,9 @@ public class HostDynamicWorkloadAlt extends HostDynamicWorkload {
 								+ getNumberOfPes() + " * " + getVmScheduler().getPeCapacity() + ")."
 								+ pesString,
 								CloudSim.clock());
+				
+				System.out.println(getVmScheduler().getAllocatedMipsForVm(vm).toString());
+					
 			}
 
 		}

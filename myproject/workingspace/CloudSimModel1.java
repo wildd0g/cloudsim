@@ -127,7 +127,9 @@ public class CloudSimModel1 {
 			long length = 400000;
 			long fileSize = 300;
 			long outputSize = 300;
-			UtilizationModel utilizationModel = new UtilizationModelFull();
+			//UtilizationModel utilizationModel = new UtilizationModelFull();
+			UtilizationModel utilizationModel = new UtilizationModelStochastic();
+			//UtilizationModel utilizationModel = new UtilizationModelFull();
 			
 			for (int i=0; i<10; i++) {
 				id = i;
