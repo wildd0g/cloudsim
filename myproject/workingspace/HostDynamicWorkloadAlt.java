@@ -82,8 +82,6 @@ public class HostDynamicWorkloadAlt extends HostDynamicWorkload {
 								+ getNumberOfPes() + " * " + getVmScheduler().getPeCapacity() + ")."
 								+ pesString,
 								CloudSim.clock());
-				
-				System.out.println(getVmScheduler().getAllocatedMipsForVm(vm).toString());
 					
 			}
 

@@ -3,18 +3,18 @@ package workingspace;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import org.cloudbus.cloudsim.CloudletSchedulerSpaceShared;
 import org.cloudbus.cloudsim.Log;
 import org.cloudbus.cloudsim.Pe;
 import org.cloudbus.cloudsim.ResCloudlet;
+import org.cloudbus.cloudsim.provisioners.PeProvisionerSimple;
 
 public class CloudletSchedulerSpaceSharedAlt extends
 CloudletSchedulerSpaceShared {
 
 	/** List containing all PEs. */
-	private List<Pe> Pes; 
+	private List<Pe> peList; 
 
 	/** The cache of the previous time when the {@link #getCurrentRequestedMips()} was called. */
 	private double cachePreviousTime;
@@ -23,28 +23,31 @@ CloudletSchedulerSpaceShared {
 	 * @see  #getCurrentRequestedMips() 
 	 */
 	private List<Double> cacheCurrentRequestedMips;
-
-
-	public CloudletSchedulerSpaceSharedAlt() {
+	
+	public CloudletSchedulerSpaceSharedAlt(double mips, int numberOfPes) {
+		this(generateGenericPeList(mips, numberOfPes));
+	}
+	
+	public CloudletSchedulerSpaceSharedAlt(List<Pe> peList) {
 		super();
-		
-		// TODO Auto-generated constructor stub
-		// TODO suficient?
+		setPeList(peList);
 	}
 
 	@Override
 	public List<Double> getCurrentRequestedMips() {
 		List<Double> mipsShare = new ArrayList<Double>();
+		Iterator<Pe> peIterator = getPeList().iterator();
+		Pe PE = null;
 		
 		if (getCloudletExecList().size() > getPeList().size()) {
 			Log.printConcatLine("There was an error in a speca shared cloudled scheduler where there were more cloudlets executing simultaniously than PE's in the VM.");
 			Log.printConcatLine("THIS SHOULD NEVER HAPEN! The scheduler should not allow this at all!.");
+			Log.printConcatLine(getCloudletExecList().toString()," > " , getPeList().toString());
 			System.exit(0);
 		}
 		
 		if (getCloudletExecList() != null) {
-			Iterator<Pe> peIterator = getPeList().iterator();
-			Pe PE = null;
+			
 			for (ResCloudlet rc1 : getCloudletExecList()) {
 				if (!peIterator.hasNext()) {
 					Log.printConcatLine("How did you even get this error? a previous check should have kicked you out already!?!?!");
@@ -53,6 +56,20 @@ CloudletSchedulerSpaceShared {
 				}
 				PE = peIterator.next();
 				mipsShare.add(rc1.getCloudlet().getUtilizationOfCpu(getPreviousTime()) * PE.getMips());
+			}
+		}
+		if (mipsShare.size() < getPeList().size()){
+			Iterator<ResCloudlet> newCloudlets = getCloudletWaitingList().iterator();
+			ResCloudlet newCloudlet = null;
+			while (mipsShare.size() < getPeList().size() && newCloudlets.hasNext()) {
+				if (!peIterator.hasNext()) {
+					Log.printConcatLine("How did you even get this error? a previous check should have kicked you out already!?!?!");
+					Log.printConcatLine("This was generated in a space shared cloudlet scheduler");
+					System.exit(0);
+				}
+				PE = peIterator.next();
+				newCloudlet = newCloudlets.next();
+				mipsShare.add(newCloudlet.getCloudlet().getUtilizationOfCpu(getPreviousTime()) * PE.getMips());
 			}
 		}
 		return mipsShare;
@@ -66,6 +83,18 @@ CloudletSchedulerSpaceShared {
 		}
 		return totalCurrentMips;
 	}
+
+	
+	/**
+	 * Gets the list of PEs of the VM this scheduler is assigned to.
+	 * 
+	 * @return list of PEs of the VM this scheduler is assigned to.
+	 */
+	
+	protected void setPeList(List<Pe> peList) {
+		this.peList = peList;
+	}
+	
 	
 	/**
 	 * Gets the list of PEs of the VM this scheduler is assigned to.
@@ -74,7 +103,7 @@ CloudletSchedulerSpaceShared {
 	 */
 	
 	public List<Pe> getPeList() {
-		return Pes;
+		return peList;
 	}
 	
 	/**
@@ -146,5 +175,13 @@ CloudletSchedulerSpaceShared {
 	 */
 	protected void setCacheCurrentRequestedMips(List<Double> cacheCurrentRequestedMips) {
 		this.cacheCurrentRequestedMips = cacheCurrentRequestedMips;
+	}
+	
+	protected static List<Pe> generateGenericPeList(double mips, int numberOfPes) {
+		List<Pe> peList = new ArrayList<Pe>();
+		for (int i = 100; i < (numberOfPes + 100); i++) {
+			peList.add(new Pe(i,new PeProvisionerSimple(mips)));
+		}
+		return peList;
 	}
 }

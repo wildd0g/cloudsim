@@ -108,7 +108,8 @@ public class CloudSimModel1 {
 			String vmm = "Xen"; // VMM name
 			//CloudletScheduler sched = new CloudletSchedulerDynamicWorkload(mips, pesNumber);
 			//CloudletScheduler sched = new CloudletSchedulerTimeShared();
-			CloudletScheduler sched = new CloudletSchedulerSpaceShared();
+			//CloudletScheduler sched = new CloudletSchedulerSpaceShared();
+			CloudletScheduler sched = new CloudletSchedulerSpaceSharedAlt(mips, pesNumber);
 
 			// create VM
 			Vm vm = new VmAlt(vmid, brokerId, mips, pesNumber, ram, bw, size, vmm, sched);
