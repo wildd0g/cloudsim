@@ -96,8 +96,8 @@ CloudletSchedulerSpaceShared {
 		Pe PE = null;
 
 		if (getCloudletExecList().size() > getPeList().size()) {
-			Log.printConcatLine("There was an error in a speca shared cloudled scheduler where there were more cloudlets executing simultaniously than PE's in the VM.");
-			Log.printConcatLine("THIS SHOULD NEVER HAPEN! The scheduler should not allow this at all!.");
+			Log.printLine("There was an error in a space shared cloudled scheduler where there were more cloudlets executing simultaniously than PE's in the VM.");
+			Log.printLine("THIS SHOULD NEVER HAPEN! The scheduler should not allow this at all!.");
 			Log.printConcatLine(getCloudletExecList().toString()," > " , getPeList().toString());
 			System.exit(0);
 		}
@@ -106,8 +106,8 @@ CloudletSchedulerSpaceShared {
 
 			for (ResCloudlet rc1 : getCloudletExecList()) {
 				if (!peIterator.hasNext()) {
-					Log.printConcatLine("How did you even get this error? a previous check should have kicked you out already!?!?!");
-					Log.printConcatLine("This was generated in a space shared cloudlet scheduler");
+					Log.printLine("How did you even get this error? a previous check should have kicked you out already!?!?!");
+					Log.printLine("This was generated in a space shared cloudlet scheduler");
 					System.exit(0);
 				}
 				PE = peIterator.next();
