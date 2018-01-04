@@ -55,6 +55,7 @@ public class HostDynamicWorkloadAlt extends HostDynamicWorkload {
 
 		//log corrected version if needed
 		for (VmAlt vm : getVmList()) {
+
 			double totalRequestedMips = vm.getCurrentRequestedTotalMips();
 			double totalAllocatedMips = getVmScheduler().getTotalAllocatedMipsForVm(vm);
 
@@ -70,7 +71,7 @@ public class HostDynamicWorkloadAlt extends HostDynamicWorkload {
 						totalRequestedMips / vm.getTotalMips() * 100);
 				//Actual changes above, replaced getMips() with getTotalMips(), requires update to VM.
 
-								
+
 				List<Pe> pes = getVmScheduler().getPesAllocatedForVM(vm);
 				StringBuilder pesString = new StringBuilder();
 				for (Pe pe : pes) {
@@ -82,7 +83,7 @@ public class HostDynamicWorkloadAlt extends HostDynamicWorkload {
 								+ getNumberOfPes() + " * " + getVmScheduler().getPeCapacity() + ")."
 								+ pesString,
 								CloudSim.clock());
-					
+
 			}
 
 		}

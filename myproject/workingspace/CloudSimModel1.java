@@ -107,9 +107,10 @@ public class CloudSimModel1 {
 			int pesNumber = 8; // number of cpus
 			String vmm = "Xen"; // VMM name
 			//CloudletScheduler sched = new CloudletSchedulerDynamicWorkload(mips, pesNumber);
-			//CloudletScheduler sched = new CloudletSchedulerTimeShared();
 			//CloudletScheduler sched = new CloudletSchedulerSpaceShared();
 			CloudletScheduler sched = new CloudletSchedulerSpaceSharedAlt(mips, pesNumber);
+			//CloudletScheduler sched = new CloudletSchedulerTimeShared();
+			//CloudletScheduler sched = new CloudletSchedulerTimeSharedAlt(mips, pesNumber);
 
 			// create VM
 			Vm vm = new VmAlt(vmid, brokerId, mips, pesNumber, ram, bw, size, vmm, sched);
@@ -129,8 +130,8 @@ public class CloudSimModel1 {
 			long fileSize = 300;
 			long outputSize = 300;
 			//UtilizationModel utilizationModel = new UtilizationModelFull();
-			UtilizationModel utilizationModel = new UtilizationModelStochastic();
-			//UtilizationModel utilizationModel = new UtilizationModelFull();
+			//UtilizationModel utilizationModel = new UtilizationModelStochastic();
+			UtilizationModel utilizationModel = new UtilizationModelFull();
 			
 			for (int i=0; i<10; i++) {
 				id = i;
@@ -254,7 +255,7 @@ public class CloudSimModel1 {
 		// 6. Finally, we need to create a PowerDatacenter object.
 		Datacenter datacenter = null;
 		try {
-			datacenter = new Datacenter(name, characteristics, new VmAllocationPolicySimple(hostList), storageList, 0);
+			datacenter = new DatacenterAlt(name, characteristics, new VmAllocationPolicySimple(hostList), storageList, 0);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

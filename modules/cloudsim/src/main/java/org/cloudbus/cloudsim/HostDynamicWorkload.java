@@ -67,6 +67,7 @@ public class HostDynamicWorkload extends Host {
 			getVmScheduler().deallocatePesForVm(vm);
 		}
 
+		//This is where MipsMap is set!
 		for (Vm vm : getVmList()) {
 			getVmScheduler().allocatePesForVm(vm, vm.getCurrentRequestedMips());
 		}
