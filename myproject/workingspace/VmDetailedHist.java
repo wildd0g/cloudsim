@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.cloudbus.cloudsim.CloudletScheduler;
 import org.cloudbus.cloudsim.HostStateHistoryEntry;
+import org.cloudbus.cloudsim.Log;
 
 public class VmDetailedHist extends VmAlt {
 
@@ -13,6 +14,9 @@ public class VmDetailedHist extends VmAlt {
 	
 	/** The running average of the mips.  */
 	private double runningAverageMips;
+	
+	/** The running standard deviation/.  */
+	private double runningStandardDeviation;
 	
 	public VmDetailedHist(int id, int userId, double mips, int numberOfPes,
 			int ram, long bw, long size, String vmm,
@@ -80,10 +84,13 @@ public class VmDetailedHist extends VmAlt {
 		return getStateHistoryDetailed().get(getStateHistoryDetailed().size() - 1).getTime();
 	}
 	
-	/** Update the running average mips.  */
+	/** Update the running average mips.  
+	 * 
+	 * WARNING! running average might fail in case of VM not active since time = 0, use recalculate first when accuracy is key
+	 * */
 	protected void updateRunningAverageMips(double time, double allocatedMips){
 		double reducedAverage = getRunningAverageMips() * (getPreviousTime()/time);
-		double newAverage = reducedAverage + ( getRunningAverageMips() * ( (time - getPreviousTime()) /time) );
+		double newAverage = reducedAverage + ( allocatedMips * ( (time - getPreviousTime()) /time) );
 		this.runningAverageMips = newAverage;
 	}
 
@@ -93,6 +100,63 @@ public class VmDetailedHist extends VmAlt {
 	 */
 	protected double getRunningAverageMips(){
 		return runningAverageMips;
+	}
+	
+	protected void recalculateRunningAverageMips(){
+		List<VmStateHistoryEntryDetailed> histList = getStateHistoryDetailed(); 
+		double runningTotalMi = 0;
+		double totalRunningTime = 0;
+		for (int i = 1; i < histList.size(); i++){
+			if (histList.get(i-1).getHostId() > 0){
+				runningTotalMi += histList.get(i-1).getAllocatedMips();
+				totalRunningTime += histList.get(i).getTime()-histList.get(i-1).getTime();
+			}
+		}
+		if (totalRunningTime != 0) {
+		this.runningAverageMips = runningTotalMi/totalRunningTime;
+		} else {
+			Log.print("VM#" + getId() + " update running average mips failed!!! div by 0");
+		}
+			
+	}
+	
+	/** Update the running average mips.  
+	 *
+	 * WARNING! running average might fail in case of VM not active since time = 0, use recalculate first when accuracy is key
+	 */
+	protected void updateRunningStandardDeviation(double time, double allocatedMips){
+		double reducedAverage = (Math.pow(getRunningStandardDeviation(), 2)) * (getPreviousTime()/time); //de sqrt and reduce share
+		double newAverage = Math.sqrt(reducedAverage +
+				( Math.pow(allocatedMips - getRunningAverageMips(), 2) 
+						* ( (time - getPreviousTime()) /time) //share of new deviation 
+						));
+		this.runningStandardDeviation = newAverage;
+	}
+
+	/** Get the running average mips.
+	 * 
+	 * @return The running average mips
+	 */
+	protected double getRunningStandardDeviation(){
+		return runningStandardDeviation;
+	}
+	
+	protected void recalculateRunningStandardDeviation(){
+		List<VmStateHistoryEntryDetailed> histList = getStateHistoryDetailed(); 
+		double runningTotalMi = 0;
+		double totalRunningTime = 0;
+		for (int i = 1; i < histList.size(); i++){
+			if (histList.get(i-1).getHostId() > 0){
+				runningTotalMi += histList.get(i-1).getAllocatedMips();
+				totalRunningTime += histList.get(i).getTime()-histList.get(i-1).getTime();
+			}
+		}
+		if (totalRunningTime != 0) {
+		this.runningStandardDeviation = runningTotalMi/totalRunningTime;
+		} else {
+			Log.print("VM#" + getId() + " update running standard deviation failed!!! div by 0");
+		}
+			
 	}
 	
 	

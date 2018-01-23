@@ -5,6 +5,9 @@ package workingspace;
  * Description:  Model used to test different allocation algorithms for VM's
  */
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -59,12 +62,12 @@ public class CloudSimModel1 {
 	@SuppressWarnings("unused")
 	public static void main(String[] args) {
 		Log.printLine("Starting CloudSimModel1...");
-		
+
 		try {
 			// First step: Initialize the CloudSim package. It should be called before creating any entities.
 			int num_user = 1; // number of cloud users
 			Calendar calendar = Calendar.getInstance(); // Calendar whose fields have been initialized with the current date and time.
- 			boolean trace_flag = false; // trace events
+			boolean trace_flag = false; // trace events
 
 			/* Comment Start - Dinesh Bhagwat 
 			 * Initialize the CloudSim library. 
@@ -93,14 +96,14 @@ public class CloudSimModel1 {
 			Datacenter datacenter0 = createDatacenter("Datacenter_0");
 
 			// Third step: Create Broker
-			DatacenterBroker broker = createBroker();
+			DatacenterBrokerAlt broker = createBroker();
 			int brokerId = broker.getId();
 
 			// Fourth step: Create one virtual machine
 			vmlist = new ArrayList<Vm>();
 
 			// VM description
-			int numberOfVms = 6;
+			int numberOfVms = 1;
 			int vmid = 0;
 			int mips = 1000;
 			long size = 10000; // image size (MB)
@@ -109,33 +112,33 @@ public class CloudSimModel1 {
 			int pesNumber = 8; // number of cpus
 			String vmm = "Xen"; // VMM name
 			CloudletScheduler sched;
-			
+
 			for (int i=0; i<numberOfVms; i++) {
 				vmid = i;
 
 				// Create new scheduler
 				//sched = new CloudletSchedulerDynamicWorkload(mips, pesNumber);
 				//sched = new CloudletSchedulerSpaceShared();
-				sched = new CloudletSchedulerSpaceSharedAlt(mips, pesNumber);
+				//sched = new CloudletSchedulerSpaceSharedAlt(mips, pesNumber);
 				//sched = new CloudletSchedulerTimeShared();
-				//sched = new CloudletSchedulerTimeSharedAlt(mips, pesNumber);
+				sched = new CloudletSchedulerTimeSharedAlt(mips, pesNumber);
 
-				
+
 				// create VM
 				Vm vm = new VmAlt(vmid, brokerId, mips, pesNumber, ram, bw, size, vmm, sched);
-				
+
 				// add the VM to the vmList
 				vmlist.add(vm);
 			}
-			
+
 			// submit vm list to the broker
 			broker.submitVmList(vmlist);
 
 			// Fifth step: Create one Cloudlet
 			cloudletList = new ArrayList<Cloudlet>();
+			List<Double> delayList;
 
 			// Cloudlet properties
-			int numberOfCloudlets = 100;
 			int id = 0;
 			long length = 400000;
 			long fileSize = 300;
@@ -144,24 +147,30 @@ public class CloudSimModel1 {
 			//UtilizationModel utilizationModel = new UtilizationModelFull();
 			//UtilizationModel utilizationModel = new UtilizationModelStochastic();
 			UtilizationModel utilizationModel = new UtilizationModelFull();
-			
-			for (int i=0; i<numberOfCloudlets; i++) {
-				id = i;
-				Cloudlet cloudlet = 
-						new Cloudlet(id, length, pesNumber, fileSize, 
-								outputSize, utilizationModel, utilizationModel, 
-								utilizationModel);
-				cloudlet.setUserId(brokerId);
-				//cloudlet.setVmId(vmid);
 
-				// add the cloudlet to the list
-				cloudletList.add(cloudlet);
-			}
+			Cloudlet cloudlet = 
+					new Cloudlet(id, length, pesNumber, fileSize, 
+							outputSize, utilizationModel, utilizationModel, 
+							utilizationModel);
+			cloudlet.setUserId(brokerId);
+			//cloudlet.setVmId(vmid);
+
+			CloudletLoadGenerator CLGen = new CloudletLoadGenerator();
+
+			int numberOfCloudlets = 50;
+			double averageCloudletDelay = 400.0/7;
+			double secondsVarianceRange = averageCloudletDelay * 1.5;
+			Cloudlet sampleCloudlet = cloudlet;
+
+			List[] output = CLGen.GenerateCloudletList(numberOfCloudlets, averageCloudletDelay, secondsVarianceRange, sampleCloudlet);
+			cloudletList = output[0];
+			delayList = output[1];
+
 			// submit cloudlet list to the broker
-			broker.submitCloudletList(cloudletList);
+			broker.submitCloudletList(cloudletList, delayList);
 
 			printCloudletList(cloudletList);
-			
+
 			// Sixth step: Starts the simulation
 			CloudSim.startSimulation();
 
@@ -172,10 +181,10 @@ public class CloudSimModel1 {
 			printCloudletList(cloudletList);
 
 			printHostsHist(datacenter0);
-			
-			
-			
-			
+
+
+
+
 			Log.printLine("CloudSimExample1 finished!");
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -193,24 +202,24 @@ public class CloudSimModel1 {
 	 * @param mipsPerPE	The mips each CPU/core/PE has
 	 * @param PEs		The number of CPU's/cores/PEs
 	 */
-	
+
 	private static void createHost(List<Host> hostList, int ram, long storage, int bw, int mipsPerPE, int PEs) {
 		// ram = host memory (MB)
 		//storage = host storage
 		//bw = bandwith (default 10000?)
-		
+
 		// 2. A Machine contains one or more PEs or CPUs/Cores.
 		List<Pe> peList = new ArrayList<Pe>();
-		
+
 		// 3. Create PEs and add these into a list.
 		for (int i=0; i<PEs; i++){
 			peList.add(new Pe(i, new PeProvisionerSimple(mipsPerPE))); // need to store Pe id and MIPS Rating
 		}
-		
+
 		// 4. Create Host with its id and list of PEs and add them to the list
 		// of machines
 		int hostId = hostList.size();
-		
+
 		hostList.add(
 				new HostDynamicWorkloadAlt(
 						hostId,
@@ -222,8 +231,8 @@ public class CloudSimModel1 {
 						)
 				); // This is our machine
 	}
-	
-	
+
+
 	/**
 	 * Creates the datacenter.
 	 *
@@ -237,17 +246,17 @@ public class CloudSimModel1 {
 		// 1. We need to create a list to store
 		// our machine
 		List<Host> hostList = new ArrayList<Host>();
-		
+
 		int mipsPerPE = 1000;
 		int PEs = 32;
 		int ram = 256 * 1024; // host memory (MB)
 		long storage = 1000000; // host storage
 		int bw = 10000;
-		
+
 		for (int i=0; i<1; i++) {
 			createHost(hostList, ram, storage, bw, mipsPerPE, PEs);	
 		}
-		
+
 		// 5. Create a DatacenterCharacteristics object that stores the
 		// properties of a data center: architecture, OS, list of
 		// Machines, allocation policy: time- or space-shared, time zone
@@ -259,10 +268,10 @@ public class CloudSimModel1 {
 		double cost = 3.0; // the cost of using processing in this resource
 		double costPerMem = 0.05; // the cost of using memory in this resource
 		double costPerStorage = 0.001; // the cost of using storage in this
-										// resource
+		// resource
 		double costPerBw = 0.0; // the cost of using bw in this resource
 		LinkedList<Storage> storageList = new LinkedList<Storage>(); // we are not adding SAN
-													// devices by now
+		// devices by now
 
 		DatacenterCharacteristics characteristics = new DatacenterCharacteristics(
 				arch, os, vmm, hostList, time_zone, cost, costPerMem,
@@ -278,8 +287,8 @@ public class CloudSimModel1 {
 
 		return datacenter;
 	}
-	
-	
+
+
 
 	// We strongly encourage users to develop their own broker policies, to
 	// submit vms and cloudlets according
@@ -289,10 +298,10 @@ public class CloudSimModel1 {
 	 *
 	 * @return the datacenter broker
 	 */
-	private static DatacenterBroker createBroker() {
-		DatacenterBroker broker = null;
+	private static DatacenterBrokerAlt createBroker() {
+		DatacenterBrokerAlt broker = null;
 		try {
-			broker = new DatacenterBroker("Broker");
+			broker = new DatacenterBrokerAlt("Broker");
 		} catch (Exception e) {
 			e.printStackTrace();
 			return null;
@@ -300,53 +309,116 @@ public class CloudSimModel1 {
 		return broker;
 	}
 
-	
-	
+
+
 	private static void printHostsHist(Datacenter datacenter) {
 		List<HostDynamicWorkload> hostList = datacenter.getHostList();
 		List<StringBuilder> output = new ArrayList<StringBuilder>();
 		Iterator<HostDynamicWorkload> hostIterator = hostList.iterator();
-				
+
 		HostDynamicWorkload host = hostIterator.next();
 		List<HostStateHistoryEntry> hist = host.getStateHistory();
-		
+
 		StringBuilder line = new StringBuilder();
-		line.append("time" + ", " 
-				+ "Host #" + host.getId() + " mips requested" + ", " 
-				+ "Host #" + host.getId() + " mips alocated" + ", "
+		line.append("time" + "," 
+				+ "Host #" + host.getId() + " mips requested" + "," 
+				+ "Host #" + host.getId() + " mips alocated" + ","
 				+ "Host #" + host.getId() + " is active");
 		output.add(line);
-		
+
 		for (HostStateHistoryEntry entry : hist) {
 			line = new StringBuilder();
-			line.append(entry.getTime() + ", " + entry.getRequestedMips() + ", " + entry.getAllocatedMips() + ", " + entry.isActive());
+			line.append(entry.getTime() + ","
+					+ entry.getRequestedMips() + ","
+					+ entry.getAllocatedMips() + ","
+					+ entry.isActive());
 			output.add(line);
 		}
-		
+
 		while (hostIterator.hasNext()) {
 			host = hostIterator.next();
 			hist = host.getStateHistory();
 			int i = 0;
-			output.get(i).append(", " + "Host #" + host.getId() + " mips requested"
-					+ ", " + "Host #" + host.getId() + " mips alocated"
-					+ ", " + "Host #" + host.getId() + " is active");
+			output.get(i).append("," + "Host #" + host.getId() + " mips requested"
+					+ "," + "Host #" + host.getId() + " mips alocated"
+					+ "," + "Host #" + host.getId() + " is active");
 			i++;
-			
+
 			for (HostStateHistoryEntry entry : hist) {
 				output.get(i).append(", " + entry.getRequestedMips() + ", " + entry.getAllocatedMips() + ", " + entry.isActive());
 				i++;
 			}
-			
+
 		}
-		
-		
+
+
 		Log.printLine("");
 		Log.printLine("========== CSV OUTPUT ==========");
 		for (StringBuilder outputLine : output) {
 			Log.printLine(outputLine);
 		}
+		Log.printLine("Writing TotalHost to CSV...");
+		try {
+			WriteToCSV(output, "TotalHostHist");
+		} catch (FileNotFoundException e) {
+			Log.print("Error, file not found: " + e.getMessage());
+		}
 	}
-	
+
+	private static void printVmHist(VmDetailedHist vm) {
+		//List<HostDynamicWorkload> hostList = datacenter.getHostList();
+		List<StringBuilder> output = new ArrayList<StringBuilder>();
+		//Iterator<HostDynamicWorkload> hostIterator = hostList.iterator();
+
+		//HostDynamicWorkload host = hostIterator.next();
+		List<VmStateHistoryEntryDetailed> hist = vm.getStateHistoryDetailed();
+
+		StringBuilder line = new StringBuilder();
+		line.append("time" + "," 
+				+ "Vm #" + vm.getId() + " mips requested" + "," 
+				+ "Vm #" + vm.getId() + " mips alocated" + ","
+				+ "Vm #" + vm.getId() + " is mygrating" + ","
+				+ "Vm #" + vm.getId() + " host id");
+		output.add(line);
+
+		for (VmStateHistoryEntryDetailed entry : hist) {
+			line = new StringBuilder();
+			line.append(entry.getTime()
+					+ "," + entry.getRequestedMips()
+					+ "," + entry.getAllocatedMips()
+					+ "," + entry.isInMigration()
+					+ "," + entry.getHostId()
+					+ "\n");
+			output.add(line);
+		}
+
+		Log.printLine("");
+		Log.printLine("========== CSV OUTPUT ==========");
+		for (StringBuilder outputLine : output) {
+			Log.printLine(outputLine);
+
+		}
+		Log.printLine("Writing VmHist to CSV...");
+		try {
+			WriteToCSV(output, "VmHistId" + vm.getId());
+		} catch (FileNotFoundException e) {
+			Log.print("Error, file not found: " + e.getMessage());
+		}
+	}
+
+	private static void WriteToCSV(List<StringBuilder> stringList, String filename) throws FileNotFoundException{
+		PrintWriter pw = new PrintWriter(new File(filename + ".csv"));
+		StringBuilder sb = new StringBuilder();
+		for (StringBuilder line : stringList) {
+			sb.append(line.toString());
+			sb.append("\n");
+		}
+		pw.write(sb.toString());
+		pw.close();
+		Log.print("Writen to " + filename + ".csv\n");
+	}
+
+
 	/**
 	 * Prints the Cloudlet objects.
 	 *
@@ -373,7 +445,7 @@ public class CloudSimModel1 {
 			} else{
 				Log.print("OTHER");
 			}
-				
+
 			Log.printLine(indent + indent + cloudlet.getResourceId()
 					+ indent + indent + indent + cloudlet.getVmId()
 					+ indent + indent
