@@ -1,8 +1,6 @@
-package workingspace;
+package poweralt;
 
 import java.io.IOException;
-
-import org.cloudbus.cloudsim.examples.power.random.RandomRunner;
 
 /**
  * A simulation of a heterogeneous power aware data center that applies the Local Regression (LR) VM
@@ -31,13 +29,13 @@ public class PowerSimming {
 	 */
 	public static void main(String[] args) throws IOException {
 		boolean enableOutput = true;
-		boolean outputToFile = false;
+		boolean outputToFile = true;
 		String inputFolder = "";
-		String outputFolder = "";
+		String outputFolder = "C:\\cloudsim\\CSVOut";
 		String workload = "random"; // Random workload
-		String vmAllocationPolicy = "lr"; // Local Regression (LR) VM allocation policy
-		String vmSelectionPolicy = "mc"; // Maximum Correlation (MC) VM selection policy
-		String parameter = "1.2"; // the safety parameter of the LR policy
+		String vmAllocationPolicy = "thr"; // Local Regression (LR) VM allocation policy
+		String vmSelectionPolicy = "mmt"; // Maximum Correlation (MC) VM selection policy
+		String parameter = "0.8"; // the safety parameter of the LR policy
 
 		new RandomRunner(
 				enableOutput,
