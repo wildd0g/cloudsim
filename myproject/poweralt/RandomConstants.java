@@ -18,6 +18,6 @@ public class RandomConstants {
 
 	public final static int NUMBER_OF_HOSTS = 50;
 
-	public final static long CLOUDLET_UTILIZATION_SEED = 2;
+	public final static long CLOUDLET_UTILIZATION_SEED = 6;
 
 }

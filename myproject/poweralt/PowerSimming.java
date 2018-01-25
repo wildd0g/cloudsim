@@ -33,7 +33,7 @@ public class PowerSimming {
 		String inputFolder = "";
 		String outputFolder = "C:\\cloudsim\\CSVOut";
 		String workload = "random"; // Random workload
-		String vmAllocationPolicy = "thr"; // Local Regression (LR) VM allocation policy
+		String vmAllocationPolicy = "sg"; // Local Regression (LR) VM allocation policy
 		String vmSelectionPolicy = "mmt"; // Maximum Correlation (MC) VM selection policy
 		String parameter = "0.8"; // the safety parameter of the LR policy
 
@@ -46,6 +46,67 @@ public class PowerSimming {
 				vmAllocationPolicy,
 				vmSelectionPolicy,
 				parameter);
+
+		vmAllocationPolicy = "thr";
+
+		new RandomRunner(
+				enableOutput,
+				outputToFile,
+				inputFolder,
+				outputFolder,
+				workload,
+				vmAllocationPolicy,
+				vmSelectionPolicy,
+				parameter);
+
+		vmAllocationPolicy = "thr2";
+
+		new RandomRunner(
+				enableOutput,
+				outputToFile,
+				inputFolder,
+				outputFolder,
+				workload,
+				vmAllocationPolicy,
+				vmSelectionPolicy,
+				parameter);
+
+		parameter = "0.9";
+
+		new RandomRunner(
+				enableOutput,
+				outputToFile,
+				inputFolder,
+				outputFolder,
+				workload,
+				vmAllocationPolicy,
+				vmSelectionPolicy,
+				parameter);
+
+		vmAllocationPolicy = "thr";
+
+		new RandomRunner(
+				enableOutput,
+				outputToFile,
+				inputFolder,
+				outputFolder,
+				workload,
+				vmAllocationPolicy,
+				vmSelectionPolicy,
+				parameter);
+		
+		vmAllocationPolicy = "sg";
+
+		new RandomRunner(
+				enableOutput,
+				outputToFile,
+				inputFolder,
+				outputFolder,
+				workload,
+				vmAllocationPolicy,
+				vmSelectionPolicy,
+				parameter);
+
 	}
 
 }

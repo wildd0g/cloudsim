@@ -155,7 +155,7 @@ public abstract class RunnerAbstract {
 	 * @param vmAllocationPolicy the vm allocation policy
 	 */
 	protected void start(String experimentName, String outputFolder, VmAllocationPolicy vmAllocationPolicy) {
-		System.out.println("Starting " + experimentName);
+		System.out.println("\n\n\nStarting " + experimentName);
 
 		try {
 			PowerDatacenter datacenter = (PowerDatacenter) Helper.createDatacenter(
@@ -279,6 +279,11 @@ public abstract class RunnerAbstract {
 					fallbackVmSelectionPolicy);
 		} else if (vmAllocationPolicyName.equals("thr")) {
 			vmAllocationPolicy = new PowerVmAllocationPolicyMigrationStaticThreshold(
+					hostList,
+					vmSelectionPolicy,
+					parameter);
+		} else if (vmAllocationPolicyName.equals("thr2")) {
+			vmAllocationPolicy = new PowerVmAllocationPolicyMigrationStaticThresholdV2(
 					hostList,
 					vmSelectionPolicy,
 					parameter);
